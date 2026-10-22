@@ -1,0 +1,501 @@
+Campaign,Channel,Spend,LeadsGenerated,Conversions
+Campaign Alpha,Direct Mail,34014.98,173,44
+Campaign Alpha,Webinar,34753.5,248,17
+Campaign Alpha,Direct Mail,31355.47,359,12
+Campaign Alpha,Google Ads,48794.69,270,28
+Campaign Alpha,Webinar,6288.87,316,42
+Campaign Alpha,Google Ads,38529.4,308,41
+Campaign Alpha,LinkedIn,22408.37,173,34
+Campaign Alpha,Google Ads,30544.14,390,4
+Campaign Alpha,Google Ads,33307.86,209,58
+Campaign Alpha,Google Ads,11607.72,96,42
+Campaign Alpha,Google Ads,10353.33,83,23
+Campaign Alpha,Google Ads,13800.56,330,44
+Campaign Alpha,Google Ads,17366.56,337,41
+Campaign Alpha,Webinar,21017.45,282,32
+Campaign Alpha,LinkedIn,8564.53,198,39
+Campaign Alpha,LinkedIn,23286.84,345,32
+Campaign Alpha,LinkedIn,46467.1,233,26
+Campaign Alpha,Direct Mail,38399.79,130,39
+Campaign Alpha,Webinar,37901.29,280,27
+Campaign Alpha,LinkedIn,21355.71,365,15
+Campaign Alpha,Webinar,31972.37,239,40
+Campaign Alpha,Direct Mail,17302.36,242,26
+Campaign Alpha,Google Ads,22368.46,111,34
+Campaign Alpha,LinkedIn,22080.95,358,21
+Campaign Alpha,Google Ads,39917.41,70,11
+Campaign Alpha,Webinar,28478.38,351,29
+Campaign Alpha,Webinar,22856.08,365,46
+Campaign Alpha,Google Ads,12599.73,135,55
+Campaign Alpha,Webinar,46414.58,245,19
+Campaign Alpha,Google Ads,21020.97,94,25
+Campaign Alpha,Webinar,20055.14,396,46
+Campaign Alpha,Webinar,21409.63,239,18
+Campaign Alpha,Webinar,16556.59,119,49
+Campaign Alpha,Google Ads,42597.48,370,19
+Campaign Alpha,LinkedIn,36273.68,58,52
+Campaign Alpha,Google Ads,35960.35,346,13
+Campaign Alpha,Google Ads,27870.72,287,57
+Campaign Alpha,Google Ads,14528.44,314,6
+Campaign Alpha,Webinar,24971.37,26,24
+Campaign Alpha,Direct Mail,43170.94,41,11
+Campaign Alpha,Google Ads,37825.82,323,16
+Campaign Alpha,LinkedIn,28923.59,287,10
+Campaign Alpha,Google Ads,41342.83,38,56
+Campaign Alpha,Google Ads,25151.31,267,39
+Campaign Alpha,Google Ads,41063.96,290,10
+Campaign Alpha,Google Ads,29844.13,28,30
+Campaign Alpha,Direct Mail,18007.67,126,16
+Campaign Alpha,Webinar,32484.19,316,39
+Campaign Alpha,Direct Mail,36689.88,348,37
+Campaign Alpha,Webinar,36065.61,175,41
+Campaign Alpha,Webinar,37724.13,95,45
+Campaign Alpha,LinkedIn,45155.39,344,23
+Campaign Alpha,Webinar,12130.65,391,52
+Campaign Alpha,Direct Mail,36732.95,160,52
+Campaign Alpha,Google Ads,43691.72,115,36
+Campaign Alpha,Google Ads,21766.72,298,40
+Campaign Alpha,LinkedIn,23070.49,25,24
+Campaign Alpha,LinkedIn,13340.5,31,20
+Campaign Alpha,LinkedIn,30726.95,321,18
+Campaign Alpha,Direct Mail,47556.25,92,23
+Campaign Alpha,Direct Mail,14176.29,254,39
+Campaign Alpha,Google Ads,41492.2,308,3
+Campaign Alpha,Webinar,14723.4,247,16
+Campaign Alpha,LinkedIn,11502.1,263,35
+Campaign Alpha,LinkedIn,31662.45,117,58
+Campaign Alpha,Webinar,33610.54,379,32
+Campaign Alpha,Webinar,39801.15,56,12
+Campaign Alpha,Webinar,29979.99,21,11
+Campaign Alpha,Google Ads,23322.68,302,5
+Campaign Alpha,Google Ads,11611.39,177,34
+Campaign Alpha,Google Ads,25369.69,172,29
+Campaign Alpha,Direct Mail,39807.7,154,51
+Campaign Alpha,Direct Mail,46959.78,390,46
+Campaign Alpha,Webinar,35612.1,72,39
+Campaign Alpha,LinkedIn,41508.21,112,45
+Campaign Alpha,Google Ads,36048.49,60,9
+Campaign Alpha,Webinar,15616.16,189,33
+Campaign Alpha,Google Ads,43013.41,211,3
+Campaign Alpha,Direct Mail,39102.45,225,37
+Campaign Alpha,LinkedIn,14607.49,118,11
+Campaign Alpha,Webinar,27755.09,209,26
+Campaign Alpha,LinkedIn,47036.58,95,39
+Campaign Alpha,Google Ads,35608.86,219,26
+Campaign Alpha,Webinar,45530.09,250,20
+Campaign Alpha,Direct Mail,16697.59,359,20
+Campaign Alpha,LinkedIn,42216.83,302,23
+Campaign Alpha,Google Ads,13074.6,84,59
+Campaign Alpha,Google Ads,39872.79,373,49
+Campaign Alpha,Google Ads,34723.25,63,21
+Campaign Alpha,Direct Mail,41428.31,222,36
+Campaign Alpha,Google Ads,39009.65,202,20
+Campaign Alpha,Direct Mail,26053.81,377,2
+Campaign Alpha,Direct Mail,45774.21,326,15
+Campaign Alpha,Google Ads,22588.55,29,58
+Campaign Alpha,Google Ads,24526.12,86,54
+Campaign Alpha,Google Ads,39236.59,176,16
+Campaign Alpha,Direct Mail,41368.48,338,50
+Campaign Alpha,Direct Mail,20100.17,207,16
+Campaign Alpha,Google Ads,29225.54,371,12
+Campaign Alpha,Webinar,13763.08,350,55
+Campaign Beta,Webinar,8066.12,217,58
+Campaign Beta,Google Ads,22211.27,23,24
+Campaign Beta,Direct Mail,47501.79,345,24
+Campaign Beta,Webinar,17048.94,194,36
+Campaign Beta,Google Ads,6820.43,50,2
+Campaign Beta,Google Ads,34044.85,205,49
+Campaign Beta,Direct Mail,22065.17,86,52
+Campaign Beta,LinkedIn,38324.2,262,56
+Campaign Beta,LinkedIn,16660.35,338,8
+Campaign Beta,Webinar,36807.92,63,30
+Campaign Beta,Google Ads,43763.08,382,35
+Campaign Beta,Direct Mail,27382.63,343,51
+Campaign Beta,Direct Mail,47966.16,46,38
+Campaign Beta,Direct Mail,41147.89,337,49
+Campaign Beta,Google Ads,24800.69,189,11
+Campaign Beta,Google Ads,20045.68,378,57
+Campaign Beta,Google Ads,49691.05,43,56
+Campaign Beta,Google Ads,46940.52,137,45
+Campaign Beta,Webinar,37912.08,42,23
+Campaign Beta,Webinar,20952.91,392,41
+Campaign Beta,Direct Mail,9231.77,141,13
+Campaign Beta,Direct Mail,10964.75,356,46
+Campaign Beta,Google Ads,39169.27,208,13
+Campaign Beta,Direct Mail,34351.29,388,38
+Campaign Beta,LinkedIn,16782.19,319,35
+Campaign Beta,Direct Mail,8764.34,216,36
+Campaign Beta,Webinar,49432.44,144,55
+Campaign Beta,Webinar,36046.19,210,5
+Campaign Beta,Google Ads,5386.21,93,37
+Campaign Beta,Direct Mail,12170.64,329,48
+Campaign Beta,LinkedIn,33183.51,377,36
+Campaign Beta,LinkedIn,10880.62,387,6
+Campaign Beta,Google Ads,21646.65,322,14
+Campaign Beta,Webinar,34987.1,224,7
+Campaign Beta,Direct Mail,5159.4,100,59
+Campaign Beta,LinkedIn,5118.94,199,19
+Campaign Beta,Webinar,21563.05,380,36
+Campaign Beta,Google Ads,49264.76,121,35
+Campaign Beta,Direct Mail,13935.31,77,46
+Campaign Beta,Webinar,25019.56,202,18
+Campaign Beta,LinkedIn,35572.31,136,20
+Campaign Beta,LinkedIn,22208.5,228,50
+Campaign Beta,Direct Mail,31929.4,93,37
+Campaign Beta,Google Ads,6923.19,21,34
+Campaign Beta,Direct Mail,28187.9,390,31
+Campaign Beta,Google Ads,18087.72,345,57
+Campaign Beta,Webinar,46684.93,244,45
+Campaign Beta,Google Ads,28771.89,289,55
+Campaign Beta,Direct Mail,19899.36,120,39
+Campaign Beta,Webinar,16850.1,211,33
+Campaign Beta,Webinar,9021.4,82,8
+Campaign Beta,Webinar,31636.7,340,56
+Campaign Beta,Google Ads,13194.64,190,52
+Campaign Beta,Google Ads,45631.31,387,55
+Campaign Beta,Webinar,47374.78,40,52
+Campaign Beta,Direct Mail,25886.2,31,50
+Campaign Beta,LinkedIn,21708.41,387,9
+Campaign Beta,LinkedIn,23997.29,116,27
+Campaign Beta,Webinar,19517.58,101,34
+Campaign Beta,LinkedIn,46443.2,182,46
+Campaign Beta,Google Ads,47582.97,58,33
+Campaign Beta,Direct Mail,22533.7,131,14
+Campaign Beta,LinkedIn,44350.53,151,23
+Campaign Beta,Webinar,33235.7,358,23
+Campaign Beta,Webinar,42675.76,197,20
+Campaign Beta,Google Ads,28446.69,124,3
+Campaign Beta,Webinar,10263.46,341,35
+Campaign Beta,Webinar,24500.73,261,37
+Campaign Beta,Webinar,27819.39,379,22
+Campaign Beta,Google Ads,36807.76,315,23
+Campaign Beta,Direct Mail,40273.87,100,53
+Campaign Beta,Google Ads,10170.45,74,32
+Campaign Beta,Google Ads,34320.19,136,14
+Campaign Beta,Google Ads,27466.23,352,50
+Campaign Beta,Google Ads,29766.3,256,48
+Campaign Beta,LinkedIn,13037.63,365,48
+Campaign Beta,LinkedIn,9475.34,242,44
+Campaign Beta,Direct Mail,18878.71,305,16
+Campaign Beta,Google Ads,18105.99,113,57
+Campaign Beta,Direct Mail,18816.52,251,5
+Campaign Beta,Google Ads,49836.46,290,27
+Campaign Beta,Direct Mail,29224.02,54,52
+Campaign Beta,Direct Mail,45636.81,49,57
+Campaign Beta,Direct Mail,35007.64,106,9
+Campaign Beta,Google Ads,9029.82,276,41
+Campaign Beta,Google Ads,23597.4,62,4
+Campaign Beta,Direct Mail,30738.3,26,40
+Campaign Beta,Direct Mail,38276.87,269,25
+Campaign Beta,Webinar,34054.47,222,21
+Campaign Beta,Direct Mail,42409.41,162,21
+Campaign Beta,Google Ads,35992.63,53,44
+Campaign Beta,LinkedIn,5930.46,276,51
+Campaign Beta,Direct Mail,8518.14,345,28
+Campaign Beta,LinkedIn,35481.78,137,18
+Campaign Beta,Google Ads,30730.2,151,34
+Campaign Beta,LinkedIn,14496.93,82,32
+Campaign Beta,LinkedIn,17416.26,30,18
+Campaign Beta,LinkedIn,21589.17,199,8
+Campaign Beta,Direct Mail,29150.0,137,17
+Campaign Beta,Webinar,49953.21,308,36
+Campaign Gamma,Google Ads,48091.17,204,17
+Campaign Gamma,LinkedIn,25984.11,108,17
+Campaign Gamma,Google Ads,37601.7,246,34
+Campaign Gamma,Google Ads,13082.56,193,6
+Campaign Gamma,Direct Mail,20490.63,97,7
+Campaign Gamma,Direct Mail,45950.16,135,50
+Campaign Gamma,Direct Mail,11011.09,113,14
+Campaign Gamma,LinkedIn,43389.13,84,29
+Campaign Gamma,Webinar,7459.18,343,19
+Campaign Gamma,Google Ads,18357.38,256,52
+Campaign Gamma,Direct Mail,17067.81,152,36
+Campaign Gamma,Webinar,31785.42,221,17
+Campaign Gamma,Google Ads,15227.04,396,18
+Campaign Gamma,LinkedIn,14015.5,98,18
+Campaign Gamma,Webinar,32636.79,185,37
+Campaign Gamma,Webinar,47227.44,81,28
+Campaign Gamma,Google Ads,5163.11,336,42
+Campaign Gamma,Direct Mail,47436.59,89,36
+Campaign Gamma,Google Ads,19614.54,266,29
+Campaign Gamma,Webinar,13980.64,105,18
+Campaign Gamma,Direct Mail,24296.77,358,4
+Campaign Gamma,Google Ads,49879.3,395,33
+Campaign Gamma,Webinar,30623.23,42,45
+Campaign Gamma,Direct Mail,46163.08,109,8
+Campaign Gamma,LinkedIn,36178.52,106,8
+Campaign Gamma,LinkedIn,32863.75,163,48
+Campaign Gamma,LinkedIn,11912.72,367,15
+Campaign Gamma,LinkedIn,24377.45,283,10
+Campaign Gamma,LinkedIn,28332.4,248,57
+Campaign Gamma,Google Ads,41666.17,118,45
+Campaign Gamma,Google Ads,40475.16,192,51
+Campaign Gamma,LinkedIn,44815.55,335,50
+Campaign Gamma,LinkedIn,42334.19,117,6
+Campaign Gamma,Webinar,43501.58,398,18
+Campaign Gamma,Webinar,5169.02,342,16
+Campaign Gamma,LinkedIn,13036.76,309,14
+Campaign Gamma,Google Ads,9617.54,40,2
+Campaign Gamma,Webinar,10020.71,315,25
+Campaign Gamma,Google Ads,9761.14,118,16
+Campaign Gamma,LinkedIn,25898.95,253,44
+Campaign Gamma,LinkedIn,24175.57,172,58
+Campaign Gamma,Direct Mail,23405.77,138,19
+Campaign Gamma,LinkedIn,14515.0,277,18
+Campaign Gamma,Webinar,24418.02,217,51
+Campaign Gamma,Webinar,10848.62,74,13
+Campaign Gamma,Google Ads,40223.37,119,18
+Campaign Gamma,Google Ads,41336.74,255,38
+Campaign Gamma,LinkedIn,42922.26,73,15
+Campaign Gamma,LinkedIn,49726.57,281,37
+Campaign Gamma,Webinar,6629.58,79,42
+Campaign Gamma,Google Ads,30630.29,59,43
+Campaign Gamma,Webinar,15915.28,79,15
+Campaign Gamma,Webinar,23110.01,296,45
+Campaign Gamma,Direct Mail,42498.76,261,16
+Campaign Gamma,Direct Mail,15454.16,100,9
+Campaign Gamma,Webinar,44757.98,82,9
+Campaign Gamma,Google Ads,39026.54,200,13
+Campaign Gamma,Direct Mail,20102.16,321,29
+Campaign Gamma,Google Ads,18935.12,199,7
+Campaign Gamma,Webinar,17791.02,216,38
+Campaign Gamma,Direct Mail,7363.66,41,20
+Campaign Gamma,Webinar,6970.57,382,2
+Campaign Gamma,LinkedIn,13651.6,397,29
+Campaign Gamma,Google Ads,38211.54,176,22
+Campaign Gamma,Webinar,38762.26,393,59
+Campaign Gamma,LinkedIn,34306.9,206,49
+Campaign Gamma,Webinar,31929.31,70,28
+Campaign Gamma,Direct Mail,8521.3,334,34
+Campaign Gamma,Direct Mail,9404.72,65,14
+Campaign Gamma,Google Ads,32637.33,24,55
+Campaign Gamma,Google Ads,37545.69,386,46
+Campaign Gamma,LinkedIn,10937.3,224,25
+Campaign Gamma,Google Ads,15930.81,112,50
+Campaign Gamma,Direct Mail,27805.14,242,47
+Campaign Gamma,Direct Mail,13390.16,341,52
+Campaign Gamma,Google Ads,10290.92,154,52
+Campaign Gamma,LinkedIn,44253.79,308,36
+Campaign Gamma,Webinar,15114.45,168,36
+Campaign Gamma,LinkedIn,7411.37,317,56
+Campaign Gamma,LinkedIn,45761.87,370,23
+Campaign Gamma,Webinar,7596.33,295,57
+Campaign Gamma,Google Ads,38281.77,167,16
+Campaign Gamma,LinkedIn,44706.62,181,10
+Campaign Gamma,LinkedIn,22277.29,281,3
+Campaign Gamma,Direct Mail,20636.09,175,51
+Campaign Gamma,Webinar,13766.92,328,25
+Campaign Gamma,Webinar,22010.04,57,58
+Campaign Gamma,LinkedIn,25072.37,260,4
+Campaign Gamma,Google Ads,10694.45,187,30
+Campaign Gamma,Webinar,14727.58,275,21
+Campaign Gamma,Webinar,21815.14,398,34
+Campaign Gamma,Direct Mail,21513.82,167,9
+Campaign Gamma,Webinar,11251.13,228,57
+Campaign Gamma,Google Ads,48772.5,137,57
+Campaign Gamma,Direct Mail,44796.4,332,49
+Campaign Gamma,Google Ads,45047.13,192,29
+Campaign Gamma,Direct Mail,11517.29,272,28
+Campaign Gamma,Webinar,26876.91,338,19
+Campaign Gamma,Google Ads,35841.33,197,57
+Campaign Gamma,Webinar,6952.13,129,58
+Campaign Delta,Google Ads,6004.68,360,15
+Campaign Delta,LinkedIn,13649.81,119,5
+Campaign Delta,Webinar,21570.09,99,6
+Campaign Delta,Google Ads,10968.69,184,45
+Campaign Delta,Direct Mail,12729.4,93,13
+Campaign Delta,Google Ads,41758.88,232,33
+Campaign Delta,Direct Mail,40874.46,82,40
+Campaign Delta,LinkedIn,39913.96,135,5
+Campaign Delta,Webinar,15821.12,258,41
+Campaign Delta,Google Ads,14829.47,34,44
+Campaign Delta,Direct Mail,44938.87,72,22
+Campaign Delta,Webinar,44027.43,48,16
+Campaign Delta,Google Ads,21544.28,102,50
+Campaign Delta,Webinar,30966.65,240,42
+Campaign Delta,Google Ads,37203.33,345,57
+Campaign Delta,LinkedIn,47014.97,366,33
+Campaign Delta,Direct Mail,7689.0,287,53
+Campaign Delta,Google Ads,30715.86,93,37
+Campaign Delta,Direct Mail,46261.7,237,12
+Campaign Delta,Webinar,16777.93,44,20
+Campaign Delta,LinkedIn,8421.85,302,24
+Campaign Delta,Google Ads,10576.99,129,39
+Campaign Delta,Webinar,9276.08,395,13
+Campaign Delta,Google Ads,8332.32,196,51
+Campaign Delta,Direct Mail,12629.67,105,14
+Campaign Delta,LinkedIn,35524.43,206,12
+Campaign Delta,Google Ads,6136.56,314,58
+Campaign Delta,Direct Mail,19358.01,392,27
+Campaign Delta,Google Ads,26632.07,118,49
+Campaign Delta,LinkedIn,13150.7,84,50
+Campaign Delta,Direct Mail,10748.48,173,6
+Campaign Delta,Google Ads,7654.05,261,54
+Campaign Delta,Webinar,49936.0,125,45
+Campaign Delta,LinkedIn,11637.06,31,48
+Campaign Delta,LinkedIn,35718.94,130,36
+Campaign Delta,Direct Mail,35051.89,258,52
+Campaign Delta,Direct Mail,32155.13,270,38
+Campaign Delta,Webinar,39626.54,285,16
+Campaign Delta,Direct Mail,21304.17,110,25
+Campaign Delta,Direct Mail,31292.89,209,11
+Campaign Delta,LinkedIn,12545.16,227,43
+Campaign Delta,Google Ads,21897.84,46,47
+Campaign Delta,Direct Mail,48835.56,224,12
+Campaign Delta,Direct Mail,33274.01,351,20
+Campaign Delta,Direct Mail,12799.62,353,33
+Campaign Delta,Google Ads,46511.27,339,43
+Campaign Delta,LinkedIn,23968.17,353,43
+Campaign Delta,LinkedIn,21198.56,296,19
+Campaign Delta,Direct Mail,23721.91,158,7
+Campaign Delta,LinkedIn,26208.46,229,17
+Campaign Delta,LinkedIn,20645.78,61,30
+Campaign Delta,Webinar,13286.67,326,26
+Campaign Delta,LinkedIn,11610.48,80,7
+Campaign Delta,Direct Mail,28892.92,78,51
+Campaign Delta,Direct Mail,15563.9,53,35
+Campaign Delta,Google Ads,44928.9,373,21
+Campaign Delta,Webinar,45888.6,140,55
+Campaign Delta,LinkedIn,20020.84,267,57
+Campaign Delta,Direct Mail,12834.32,185,6
+Campaign Delta,LinkedIn,39890.24,330,14
+Campaign Delta,Google Ads,9540.67,96,3
+Campaign Delta,LinkedIn,44958.8,220,30
+Campaign Delta,Direct Mail,22456.37,30,8
+Campaign Delta,Google Ads,15548.55,183,59
+Campaign Delta,Webinar,43405.08,175,28
+Campaign Delta,Direct Mail,33948.93,388,25
+Campaign Delta,LinkedIn,6149.86,393,58
+Campaign Delta,Direct Mail,48635.42,366,57
+Campaign Delta,LinkedIn,49109.44,123,38
+Campaign Delta,Webinar,42978.4,321,23
+Campaign Delta,LinkedIn,42473.99,76,27
+Campaign Delta,Google Ads,9995.11,293,32
+Campaign Delta,Webinar,9399.69,33,26
+Campaign Delta,Google Ads,7740.75,52,4
+Campaign Delta,LinkedIn,19441.15,65,21
+Campaign Delta,Google Ads,14591.06,266,11
+Campaign Delta,Direct Mail,19448.37,35,19
+Campaign Delta,Google Ads,34580.29,258,34
+Campaign Delta,LinkedIn,17057.67,179,40
+Campaign Delta,LinkedIn,26856.9,251,32
+Campaign Delta,Direct Mail,35644.18,56,47
+Campaign Delta,Direct Mail,11902.42,243,29
+Campaign Delta,LinkedIn,49612.15,389,55
+Campaign Delta,Webinar,44067.92,249,12
+Campaign Delta,Webinar,38118.17,49,6
+Campaign Delta,LinkedIn,49495.54,108,21
+Campaign Delta,LinkedIn,8814.58,292,49
+Campaign Delta,LinkedIn,7352.62,255,21
+Campaign Delta,Direct Mail,16557.88,96,34
+Campaign Delta,LinkedIn,20126.36,260,24
+Campaign Delta,Direct Mail,34935.69,394,9
+Campaign Delta,Direct Mail,49887.39,62,32
+Campaign Delta,Direct Mail,45867.68,115,49
+Campaign Delta,Webinar,34278.08,289,10
+Campaign Delta,Google Ads,14268.38,137,11
+Campaign Delta,Google Ads,30009.41,49,58
+Campaign Delta,LinkedIn,38862.22,379,51
+Campaign Delta,LinkedIn,40628.68,64,43
+Campaign Delta,Webinar,49537.5,71,25
+Campaign Delta,Webinar,7941.1,304,37
+Campaign Epsilon,Webinar,47406.7,239,7
+Campaign Epsilon,Google Ads,12440.34,205,27
+Campaign Epsilon,Direct Mail,33589.15,58,40
+Campaign Epsilon,Webinar,35212.57,47,53
+Campaign Epsilon,Webinar,17228.63,167,19
+Campaign Epsilon,LinkedIn,12057.85,286,39
+Campaign Epsilon,Direct Mail,19012.46,343,35
+Campaign Epsilon,Google Ads,18327.28,372,48
+Campaign Epsilon,Direct Mail,40638.54,225,11
+Campaign Epsilon,LinkedIn,14486.21,312,43
+Campaign Epsilon,LinkedIn,37798.39,262,14
+Campaign Epsilon,Google Ads,11720.25,370,49
+Campaign Epsilon,Webinar,23118.68,269,48
+Campaign Epsilon,LinkedIn,12618.25,366,48
+Campaign Epsilon,LinkedIn,46736.95,105,53
+Campaign Epsilon,Google Ads,41224.13,156,15
+Campaign Epsilon,LinkedIn,5789.79,34,4
+Campaign Epsilon,Google Ads,21110.87,208,55
+Campaign Epsilon,Google Ads,20695.64,150,24
+Campaign Epsilon,Direct Mail,26499.54,152,27
+Campaign Epsilon,LinkedIn,14803.02,357,24
+Campaign Epsilon,LinkedIn,29021.19,21,15
+Campaign Epsilon,Google Ads,19370.08,230,54
+Campaign Epsilon,Google Ads,23624.12,382,40
+Campaign Epsilon,Webinar,23692.64,36,31
+Campaign Epsilon,LinkedIn,40936.12,133,36
+Campaign Epsilon,Google Ads,32344.5,320,16
+Campaign Epsilon,LinkedIn,20111.09,294,20
+Campaign Epsilon,Webinar,41724.91,86,30
+Campaign Epsilon,Direct Mail,16974.27,298,31
+Campaign Epsilon,LinkedIn,12966.4,168,48
+Campaign Epsilon,Google Ads,9646.56,374,36
+Campaign Epsilon,Webinar,35604.88,22,29
+Campaign Epsilon,Webinar,17652.84,217,52
+Campaign Epsilon,Google Ads,23453.27,291,13
+Campaign Epsilon,Webinar,46338.16,320,52
+Campaign Epsilon,Google Ads,25807.94,98,57
+Campaign Epsilon,LinkedIn,15379.5,318,59
+Campaign Epsilon,LinkedIn,37551.4,120,44
+Campaign Epsilon,Google Ads,38693.88,336,43
+Campaign Epsilon,Webinar,49566.31,349,29
+Campaign Epsilon,Webinar,10192.46,368,44
+Campaign Epsilon,Google Ads,17570.15,57,19
+Campaign Epsilon,Webinar,14086.96,118,54
+Campaign Epsilon,Webinar,30010.03,275,30
+Campaign Epsilon,LinkedIn,47014.22,399,49
+Campaign Epsilon,Google Ads,30448.02,125,57
+Campaign Epsilon,Direct Mail,16150.65,66,28
+Campaign Epsilon,Google Ads,22826.36,186,31
+Campaign Epsilon,LinkedIn,39787.74,146,4
+Campaign Epsilon,Direct Mail,27932.11,284,45
+Campaign Epsilon,LinkedIn,14400.71,173,16
+Campaign Epsilon,LinkedIn,36337.32,189,2
+Campaign Epsilon,LinkedIn,36399.02,273,40
+Campaign Epsilon,Direct Mail,48226.45,289,50
+Campaign Epsilon,Direct Mail,43416.17,84,14
+Campaign Epsilon,Webinar,43145.2,93,16
+Campaign Epsilon,LinkedIn,45591.94,377,30
+Campaign Epsilon,Webinar,33120.49,288,27
+Campaign Epsilon,Direct Mail,26502.04,202,24
+Campaign Epsilon,Google Ads,7155.47,302,31
+Campaign Epsilon,Google Ads,22763.75,121,42
+Campaign Epsilon,Direct Mail,27498.3,305,49
+Campaign Epsilon,Google Ads,47458.7,155,29
+Campaign Epsilon,Direct Mail,29456.32,240,49
+Campaign Epsilon,Google Ads,31779.86,239,32
+Campaign Epsilon,Webinar,33487.8,281,56
+Campaign Epsilon,LinkedIn,46462.83,134,58
+Campaign Epsilon,LinkedIn,22744.32,390,13
+Campaign Epsilon,Webinar,46169.66,67,24
+Campaign Epsilon,Google Ads,31155.45,184,12
+Campaign Epsilon,Webinar,7512.16,122,41
+Campaign Epsilon,Direct Mail,23156.21,275,24
+Campaign Epsilon,LinkedIn,8915.37,255,38
+Campaign Epsilon,Direct Mail,14452.25,378,22
+Campaign Epsilon,Google Ads,21282.11,227,10
+Campaign Epsilon,Webinar,48270.35,188,25
+Campaign Epsilon,Webinar,31441.53,295,49
+Campaign Epsilon,Google Ads,49246.55,259,8
+Campaign Epsilon,LinkedIn,18801.75,67,19
+Campaign Epsilon,LinkedIn,35086.28,141,7
+Campaign Epsilon,Webinar,29635.23,297,23
+Campaign Epsilon,Direct Mail,22592.06,85,25
+Campaign Epsilon,Webinar,45865.58,279,36
+Campaign Epsilon,Direct Mail,26159.99,218,33
+Campaign Epsilon,LinkedIn,22685.88,233,42
+Campaign Epsilon,LinkedIn,15873.54,65,19
+Campaign Epsilon,Webinar,38413.85,311,23
+Campaign Epsilon,Webinar,32559.64,340,38
+Campaign Epsilon,Google Ads,15899.93,176,55
+Campaign Epsilon,Direct Mail,41926.41,247,31
+Campaign Epsilon,Google Ads,47685.16,238,34
+Campaign Epsilon,LinkedIn,36011.43,294,46
+Campaign Epsilon,Google Ads,23984.09,304,40
+Campaign Epsilon,Webinar,40620.36,160,24
+Campaign Epsilon,LinkedIn,29938.12,342,3
+Campaign Epsilon,Webinar,6255.6,119,10
+Campaign Epsilon,LinkedIn,34458.78,392,23
+Campaign Epsilon,Webinar,39196.69,209,2
+Campaign Epsilon,Direct Mail,18018.77,44,54
