@@ -1,0 +1,5 @@
+
+User-agent: *
+Allow: /
+
+Sitemap: https://ai-powered-data-analytic-assistant.vercel.app/sitemap.xml
