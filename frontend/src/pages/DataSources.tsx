@@ -25,7 +25,8 @@ export const DataSources: React.FC = () => {
     refreshDatasets,
     clearAllDatasets,
     setActiveTab,
-    isLoading
+    isLoading,
+    settings
   } = useApp();
 
   const [dragActive, setDragActive] = useState(false);
@@ -37,7 +38,8 @@ export const DataSources: React.FC = () => {
 
   const totalSizeBytes = datasets.reduce((sum, d) => sum + (d.size_bytes || 0), 0);
   const totalSizeMB = (totalSizeBytes / (1024 * 1024)).toFixed(1);
-  const quotaPct = Math.min(100, Math.max(0, (parseFloat(totalSizeMB) / 100) * 100)).toFixed(1);
+  const quotaMb = settings?.quota_mb || 100;
+  const quotaPct = Math.min(100, Math.max(0, (parseFloat(totalSizeMB) / quotaMb) * 100)).toFixed(1);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -76,15 +78,21 @@ export const DataSources: React.FC = () => {
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      processUpload(e.target.files[0]);
+      void processUpload(e.target.files[0]);
+      e.target.value = '';
     }
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to remove this dataset from your workspace?')) {
-      await api.deleteDataset(id);
-      await refreshDatasets();
+      try {
+        setUploadError(null);
+        await api.deleteDataset(id);
+        await refreshDatasets();
+      } catch (err: any) {
+        setUploadError(err.message || 'Could not remove the dataset.');
+      }
     }
   };
 
@@ -206,7 +214,7 @@ export const DataSources: React.FC = () => {
 
           <div className="mt-5 inline-flex items-center space-x-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-[11px] font-medium">
             <ShieldCheck size={14} />
-            <span>100% SECURE CLIENT-SIDE DATA ENCRYPTION</span>
+            <span>Processed locally by the InsightAI backend</span>
           </div>
 
           {uploadError && (
@@ -231,7 +239,7 @@ export const DataSources: React.FC = () => {
 
             <div className="flex items-baseline space-x-2">
               <span className="text-3xl font-extrabold text-white tracking-tight">{totalSizeMB}</span>
-              <span className="text-xs text-slate-400 font-medium">/ 100 MB USED</span>
+              <span className="text-xs text-slate-400 font-medium">/ {quotaMb} MB USED</span>
               <span className="ml-auto text-xs font-bold text-cyan-400">{quotaPct}%</span>
             </div>
 
@@ -280,14 +288,14 @@ export const DataSources: React.FC = () => {
       <div className="space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
           <Server size={14} className="text-purple-400" />
-          Enterprise Data Warehouses & Lakehouses
+          Additional Data Sources
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { name: 'PostgreSQL', desc: 'SSL tunneling & read replica support', badge: 'v16.2', color: '#06b6d4' },
-            { name: 'Snowflake', desc: 'OAuth & Key-Pair enterprise auth', badge: 'Cloud DW', color: '#38bdf8' },
-            { name: 'Google BigQuery', desc: 'Service account JSON credentials', badge: 'v2.0', color: '#8b5cf6' },
-            { name: 'AWS S3 / Redshift', desc: 'Auto-region firehose & Parquet support', badge: 'Direct Read', color: '#10b981' }
+            { name: 'PostgreSQL', desc: 'Database connections are not configured in this build.', badge: 'Planned' },
+            { name: 'Snowflake', desc: 'Warehouse connections are not configured in this build.', badge: 'Planned' },
+            { name: 'Google BigQuery', desc: 'Warehouse connections are not configured in this build.', badge: 'Planned' },
+            { name: 'AWS S3 / Redshift', desc: 'Cloud storage connections are not configured in this build.', badge: 'Planned' }
           ].map((connector) => (
             <div
               key={connector.name}
@@ -302,11 +310,8 @@ export const DataSources: React.FC = () => {
                 </div>
                 <p className="text-xs text-slate-400 mt-1">{connector.desc}</p>
               </div>
-              <button
-                onClick={() => alert(`Connecting to ${connector.name} is available in Enterprise edition. Local CSV/Excel parsing is active.`)}
-                className="mt-4 w-full py-1.5 text-xs font-medium rounded-lg bg-[#151c33] hover:bg-purple-600/20 text-purple-300 border border-[#232e52] hover:border-purple-500/40 transition-colors"
-              >
-                Connect
+              <button disabled className="mt-4 w-full py-1.5 text-xs font-medium rounded-lg bg-[#151c33] text-slate-500 border border-[#232e52] cursor-not-allowed">
+                Not available
               </button>
             </div>
           ))}

@@ -32,11 +32,12 @@ export const AIInsights: React.FC = () => {
   } = useApp();
 
   const [copilotInput, setCopilotInput] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
   const [copilotHistory, setCopilotHistory] = useState<Array<{ sender: 'user' | 'copilot'; text: string; actions?: string[] }>>([
     {
       sender: 'copilot',
-      text: 'Insight Co-pilot active. I have verified all correlation models against the loaded data pipeline. What specific findings would you like to drill into?',
-      actions: ['Explain discount variance', 'Check Chennai margin', 'Summarize key risks']
+      text: 'Ask about a column or a value in the selected dataset. I can calculate summaries from the loaded records.',
+      actions: ['Show summary metrics', 'Filter top records', 'Analyze trends']
     }
   ]);
   const [isCopilotThinking, setIsCopilotThinking] = useState(false);
@@ -109,6 +110,18 @@ export const AIInsights: React.FC = () => {
     is_llm_powered
   } = insightsData;
 
+  const handleShareInsights = async () => {
+    const shareText = `${dataset_name} — ${scope}\n\n${executive_summary}\n\nKey findings:\n${key_findings.map((finding) => `• ${finding.title}: ${finding.description}`).join('\n')}`;
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setShareMessage('Summary copied');
+    } catch {
+      window.prompt('Copy this insights summary:', shareText);
+      setShareMessage('Copy the summary from the dialog');
+    }
+    window.setTimeout(() => setShareMessage(''), 2500);
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fadeIn">
       {/* 1. Header */}
@@ -119,14 +132,14 @@ export const AIInsights: React.FC = () => {
               {dataset_name}
             </span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">
-              {is_llm_powered ? 'LLM Enhanced (Gemini)' : 'Deterministic Statistical Engine'}
+              {is_llm_powered ? 'LLM Enhanced' : 'Local Statistical Engine'}
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
             AI Insights & Executive Summary
           </h1>
           <p className="text-xs text-slate-400 mt-1 font-mono">
-            Automated synthesis generated from {scope} • Cross-Enterprise Accounts Audited
+            Generated from {scope}
           </p>
         </div>
 
@@ -147,11 +160,11 @@ export const AIInsights: React.FC = () => {
             <span>Export Executive Memo (PDF)</span>
           </button>
           <button
-            onClick={() => alert('Insights link copied to clipboard for team sharing.')}
+            onClick={handleShareInsights}
             className="flex items-center space-x-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 text-white px-4 py-2 rounded-xl text-xs font-medium shadow-md shadow-purple-600/30 transition-all"
           >
             <Share2 size={13} />
-            <span>Share Insights</span>
+            <span>{shareMessage || 'Copy Insights Summary'}</span>
           </button>
         </div>
       </div>
@@ -201,11 +214,6 @@ export const AIInsights: React.FC = () => {
                     <span className="text-xs font-mono font-bold text-emerald-400">
                       {finding.metric_badge}
                     </span>
-                    <div className="w-14 h-4">
-                      <svg viewBox="0 0 50 15" className="w-full h-full stroke-cyan-400 fill-none stroke-[2]">
-                        <polyline points="0,12 12,10 25,11 38,5 50,2" />
-                      </svg>
-                    </div>
                   </div>
                 </div>
               ))}
@@ -218,6 +226,7 @@ export const AIInsights: React.FC = () => {
               <TrendingUp size={14} className="text-cyan-400" />
               Trends & Seasonal Patterns
             </h2>
+            {trends_and_patterns.length === 0 && <p className="text-xs text-slate-400">No time based trend can be calculated because the dataset has no usable date column or multiple time periods.</p>}
             {trends_and_patterns.map((trend) => (
               <div
                 key={trend.id}
@@ -238,15 +247,15 @@ export const AIInsights: React.FC = () => {
                     <div className="text-xl font-extrabold text-cyan-400 font-mono">
                       {trend.multiplier}
                     </div>
-                    <div className="text-[10px] text-slate-400 uppercase font-mono">Velocity Spike</div>
+                    <div className="text-[10px] text-slate-400 uppercase font-mono">Observed change</div>
                   </div>
                   {/* Mini trend visualization */}
                   <div className="flex items-end gap-1 h-7 mt-2">
-                    {[6, 10, 8, 14, 18, 24, 28].map((h, i) => (
+                  {trend.trend_data.slice(0, 7).map((value, i, values) => (
                       <div
                         key={i}
                         className="w-1.5 rounded-t bg-cyan-500/70"
-                        style={{ height: `${h}px` }}
+                      style={{ height: `${Math.max(3, (value / Math.max(...values, 1)) * 28)}px` }}
                       />
                     ))}
                   </div>
@@ -259,8 +268,9 @@ export const AIInsights: React.FC = () => {
           <div className="space-y-3">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <AlertTriangle size={14} className="text-rose-400" />
-              Anomalies & Outliers (Audit Flags)
+              Anomalies & Outliers
             </h2>
+            {anomalies.length === 0 && <p className="text-xs text-slate-400">No records exceeded the anomaly rule applied to the available numeric fields.</p>}
             {anomalies.map((anom) => (
               <div
                 key={anom.id}
@@ -274,7 +284,7 @@ export const AIInsights: React.FC = () => {
                     <h3 className="text-sm font-bold text-white">{anom.title}</h3>
                   </div>
                   <div className="text-xs font-mono font-bold text-rose-400">
-                    Gross Variance Impact: {anom.impact_amount}
+                    Flagged records: {anom.impact_amount}
                   </div>
                 </div>
 
@@ -289,9 +299,9 @@ export const AIInsights: React.FC = () => {
                       <tr>
                         <th className="px-3 py-2 font-semibold">Order ID</th>
                         <th className="px-3 py-2 font-semibold">Product</th>
-                        <th className="px-3 py-2 font-semibold">Discount</th>
-                        <th className="px-3 py-2 font-semibold">Policy Limit</th>
-                        <th className="px-3 py-2 font-semibold text-right">Margin Impact</th>
+                        <th className="px-3 py-2 font-semibold">Observed Value</th>
+                        <th className="px-3 py-2 font-semibold">Threshold</th>
+                        <th className="px-3 py-2 font-semibold text-right">Difference</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#161e36]">
@@ -318,7 +328,7 @@ export const AIInsights: React.FC = () => {
               Actionable Business Recommendations
             </h2>
             <div className="space-y-3">
-              {recommendations.map((rec) => (
+              {recommendations.map((rec, index) => (
                 <div
                   key={rec.id}
                   className="bg-[#0f1527] border border-[#1d2744] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -331,10 +341,10 @@ export const AIInsights: React.FC = () => {
                     <p className="text-xs text-slate-300 mt-0.5">{rec.description}</p>
                   </div>
                   <button
-                    onClick={() => alert(`Triggered action: "${rec.action_label}". Dispatching automated webhook notification.`)}
+                    onClick={() => handleFollowUpQuery(suggested_queries[index % Math.max(1, suggested_queries.length)]?.query || 'Show top 10 records')}
                     className="shrink-0 px-3.5 py-1.5 rounded-xl bg-[#151c33] hover:bg-emerald-600/20 text-emerald-300 border border-[#232e52] hover:border-emerald-500/40 text-xs font-semibold transition-all"
                   >
-                    {rec.action_label}
+                    Explore with Query
                   </button>
                 </div>
               ))}

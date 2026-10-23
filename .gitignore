@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+.venv/
+.venv-run/
+venv/
+backend/.venv/
+frontend/node_modules/
+node_modules/
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+dist/
+frontend/dist/

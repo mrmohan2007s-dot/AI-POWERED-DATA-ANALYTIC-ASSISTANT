@@ -21,7 +21,7 @@ def is_numeric_column(df: pd.DataFrame, col: str) -> bool:
     # If at least 70% convert successfully and nunique > 1
     return converted.notna().sum() >= len(sample) * 0.7
 
-def find_numeric_column(df: pd.DataFrame, preferred_terms: Optional[List[str]] = None) -> Optional[str]:
+def find_numeric_column(df: pd.DataFrame, preferred_terms: Optional[List[str]] = None, fallback: bool = True) -> Optional[str]:
     """Find the best numeric column matching preferred terms or fallback to the first numeric column."""
     numeric_cols = [c for c in df.columns if is_numeric_column(df, c)]
     if not numeric_cols:
@@ -53,6 +53,9 @@ def find_numeric_column(df: pd.DataFrame, preferred_terms: Optional[List[str]] =
                 if t_low in c.lower():
                     return c
 
+    if not fallback:
+        return None
+
     # Fallback: prefer columns without penalty words
     for c in numeric_cols:
         c_low = c.lower()
@@ -61,7 +64,7 @@ def find_numeric_column(df: pd.DataFrame, preferred_terms: Optional[List[str]] =
 
     return numeric_cols[0]
 
-def find_categorical_column(df: pd.DataFrame, preferred_terms: Optional[List[str]] = None) -> Optional[str]:
+def find_categorical_column(df: pd.DataFrame, preferred_terms: Optional[List[str]] = None, fallback: bool = True) -> Optional[str]:
     """Find a categorical / text column matching preferred terms."""
     # Columns that are object/category or low distinct numeric
     cat_cols = [
@@ -86,7 +89,7 @@ def find_categorical_column(df: pd.DataFrame, preferred_terms: Optional[List[str
                 if t_low in c.lower():
                     return c
 
-    return cat_cols[0]
+    return cat_cols[0] if fallback else None
 
 def find_date_column(df: pd.DataFrame) -> Optional[str]:
     """Find a date / datetime / time column."""

@@ -5,7 +5,6 @@ import datetime
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Any, Tuple
-import httpx
 import json
 
 from app.schemas.models import (
@@ -16,7 +15,8 @@ from app.services.dataset_service import dataset_service
 from app.services.column_helper import (
     find_numeric_column, find_categorical_column, find_date_column, is_numeric_column
 )
-from app.config import GEMINI_API_KEY, OPENAI_API_KEY, GROQ_API_KEY, LLM_PROVIDER
+import app.config as config
+from app.services.llm_client import complete
 
 STOP_WORDS = {
     "the", "and", "or", "in", "on", "at", "to", "for", "of", "with", "all",
@@ -48,7 +48,7 @@ class QueryEngine:
         if request.custom_spec:
             spec = request.custom_spec
         else:
-            spec = await self._interpret_query(request.query_text, df)
+            spec = await self._interpret_query(request.query_text, df, request.deep_mode)
 
         # Step 2: Validate specification against dataset
         self._validate_spec(spec, df)
@@ -105,21 +105,19 @@ class QueryEngine:
         self._query_dfs_cache[result_id] = result_df
         return query_result
 
-    async def _interpret_query(self, query_text: str, df: pd.DataFrame) -> QuerySpecification:
+    async def _interpret_query(self, query_text: str, df: pd.DataFrame, deep_mode: bool = False) -> QuerySpecification:
         """Translates natural language to structured specification using LLM or rule-based parser."""
-        if GEMINI_API_KEY:
+        if deep_mode and config.LLM_PROVIDER != "local":
             try:
-                llm_spec = await self._interpret_with_gemini(query_text, df)
+                llm_spec = await self._interpret_with_llm(query_text, df)
                 if llm_spec:
                     return llm_spec
             except Exception as e:
-                print(f"Gemini API parse failed: {e}. Falling back to deterministic NLP analyzer.")
+                print(f"LLM parse failed: {e}. Falling back to deterministic NLP analyzer.")
 
         return self._interpret_deterministic(query_text, df)
 
-    async def _interpret_with_gemini(self, query_text: str, df: pd.DataFrame) -> Optional[QuerySpecification]:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-        
+    async def _interpret_with_llm(self, query_text: str, df: pd.DataFrame) -> Optional[QuerySpecification]:
         columns_info = [
             {"name": str(c), "dtype": str(df[c].dtype), "sample": [str(x) for x in df[c].dropna().head(3)]}
             for c in df.columns
@@ -149,17 +147,17 @@ Output ONLY valid JSON matching this schema:
   "explanation": "Human readable explanation of the plan"
 }}
 """
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(url, json={
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.1, "responseMimeType": "application/json"}
-            })
-            if resp.status_code == 200:
-                data = resp.json()
-                text = data["candidates"][0]["content"]["parts"][0]["text"]
-                parsed = json.loads(text)
-                return QuerySpecification(**parsed)
-        return None
+        response_text = await complete(
+            prompt,
+            system="Convert user requests into safe JSON query plans. Return only valid JSON.",
+            temperature=0.1,
+        )
+        if not response_text:
+            return None
+        cleaned = response_text.strip()
+        if cleaned.startswith("```"):
+            cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE)
+        return QuerySpecification(**json.loads(cleaned))
 
     def _interpret_deterministic(self, query_text: str, df: pd.DataFrame) -> QuerySpecification:
         """Deterministic NLP pattern extractor that works robustly on ANY dataset."""
@@ -313,6 +311,7 @@ Output ONLY valid JSON matching this schema:
         python_lines = []
         sql_where = []
         logic_parts = []
+        sql_select_columns = ["*"]
 
         # 1. Apply filters
         for f in spec.filters:
@@ -352,16 +351,23 @@ Output ONLY valid JSON matching this schema:
                 python_lines.append(f"df = df[pd.to_numeric(df['{col}'], errors='coerce') <= {val}]")
                 sql_where.append(f'"{col}" <= {val}')
             elif op == 'contains':
-                curr = curr[curr[col].astype(str).str.contains(str(val), case=False, na=False)]
-                python_lines.append(f"df = df[df['{col}'].astype(str).str.contains('{val}', case=False, na=False)]")
+                curr = curr[curr[col].astype(str).str.contains(str(val), case=False, na=False, regex=False)]
+                python_lines.append(f"df = df[df['{col}'].astype(str).str.contains({val!r}, case=False, na=False, regex=False)]")
                 sql_where.append(f'"{col}" LIKE \'%{val}%\'')
                 logic_parts.append(f"{col} contains '{val}'")
+            elif op == 'in':
+                values = val if isinstance(val, list) else [val]
+                curr = curr[curr[col].isin(values)]
+                python_lines.append(f"df = df[df['{col}'].isin({values!r})]")
+                rendered_values = ", ".join(repr(value) for value in values)
+                sql_where.append(f'"{col}" IN ({rendered_values})')
+                logic_parts.append(f"{col} is one of {', '.join(map(str, values))}")
 
         # 2. Group by & Aggregate
         if spec.group_by and spec.aggregations:
             valid_gb = [g for g in spec.group_by if g in curr.columns]
             if valid_gb:
-                agg_dict = {}
+                named_aggregations = {}
                 sql_select = [f'"{g}"' for g in valid_gb]
                 
                 for agg in spec.aggregations:
@@ -371,28 +377,26 @@ Output ONLY valid JSON matching this schema:
                     if fn in ['sum', 'mean']:
                         # Ensure column is numeric
                         curr[agg.column] = pd.to_numeric(curr[agg.column], errors='coerce').fillna(0.0)
-                    agg_dict[agg.column] = fn
                     sql_fn = "AVG" if fn == "mean" else fn.upper()
                     alias = agg.alias or f"{agg.column}_{fn}"
+                    if alias in named_aggregations:
+                        raise ValueError(f"Duplicate aggregation alias '{alias}'.")
+                    named_aggregations[alias] = (agg.column, fn)
                     sql_select.append(f'{sql_fn}("{agg.column}") AS "{alias}"')
 
-                if agg_dict:
-                    curr = curr.groupby(valid_gb, as_index=False).agg(agg_dict)
-                    
-                    rename_map = {}
-                    for agg in spec.aggregations:
-                        if agg.alias and agg.alias != agg.column and agg.column in agg_dict:
-                            rename_map[agg.column] = agg.alias
-                    if rename_map:
-                        curr = curr.rename(columns=rename_map)
+                sql_select_columns = sql_select
 
-                    python_lines.append(f"result = df.groupby({valid_gb}).agg({agg_dict}).reset_index()")
+                if named_aggregations:
+                    curr = curr.groupby(valid_gb).agg(**named_aggregations).reset_index()
+
+                    python_lines.append(f"result = df.groupby({valid_gb}).agg({named_aggregations}).reset_index()")
                     logic_parts.append(f"aggregated metrics by {', '.join(valid_gb)}")
         else:
             if spec.columns:
                 existing_cols = [c for c in spec.columns if c in curr.columns]
                 if existing_cols:
                     curr = curr[existing_cols]
+                    sql_select_columns = [f'"{column}"' for column in existing_cols]
 
         # 3. Sort
         if spec.sort:
@@ -414,10 +418,11 @@ Output ONLY valid JSON matching this schema:
         
         # SQL equivalent representation
         where_clause = " WHERE " + " AND ".join(sql_where) if sql_where else ""
-        group_clause = f" GROUP BY {', '.join(['\"' + g + '\"' for g in spec.group_by])}" if spec.group_by else ""
-        sort_clause = f" ORDER BY {spec.sort[0].column} {'ASC' if spec.sort[0].ascending else 'DESC'}" if (spec.sort and spec.sort[0].column in curr.columns) else ""
+        quoted_group_columns = [f'"{column}"' for column in (spec.group_by or [])]
+        group_clause = f" GROUP BY {', '.join(quoted_group_columns)}" if quoted_group_columns else ""
+        sort_clause = f' ORDER BY "{spec.sort[0].column}" {"ASC" if spec.sort[0].ascending else "DESC"}' if (spec.sort and spec.sort[0].column in curr.columns) else ""
         limit_clause = f" LIMIT {spec.limit}" if spec.limit else ""
-        sql_equivalent = f"SELECT * FROM dataset{where_clause}{group_clause}{sort_clause}{limit_clause};"
+        sql_equivalent = f"SELECT {', '.join(sql_select_columns)} FROM dataset{where_clause}{group_clause}{sort_clause}{limit_clause};"
 
         human_logic = "Filtered for " + (", ".join(logic_parts) if logic_parts else "all matching criteria") + "."
 

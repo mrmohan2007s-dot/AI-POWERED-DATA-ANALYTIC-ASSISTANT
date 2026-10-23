@@ -1,19 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   TrendingUp,
   ArrowUpRight,
-  ArrowDownRight,
-  Calendar,
-  MapPin,
-  Download,
-  Share2,
   Sparkles,
-  Layers,
-  FileSpreadsheet,
   RefreshCw,
-  ExternalLink,
-  ChevronDown,
-  BarChart2
+  BarChart2,
+  BookmarkPlus,
+  Download
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -29,7 +22,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ZAxis
 } from 'recharts';
 import { useApp } from '../context/AppContext';
 
@@ -40,10 +32,22 @@ export const AnalyticsDashboard: React.FC = () => {
     analysisScope,
     triggerAnalysis,
     isLoading,
-    setActiveTab
+    setActiveTab,
+    saveCurrentReport,
   } = useApp();
 
-  const [trajectoryMode, setTrajectoryMode] = useState<'monthly' | 'weekly'>('monthly');
+  const downloadChartSvg = () => {
+    const svg = document.querySelector<SVGSVGElement>('.recharts-wrapper svg.recharts-surface');
+    if (!svg) return;
+    const serialized = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([serialized], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${currentDataset?.name || 'analytics'}-chart.svg`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   if (!analyticsData) {
     return (
@@ -100,7 +104,7 @@ export const AnalyticsDashboard: React.FC = () => {
               <span>{p.name}:</span>
               <span className="font-semibold">
                 {typeof p.value === 'number' && p.value > 1000
-                  ? `₹${p.value.toLocaleString()}`
+                  ? p.value.toLocaleString()
                   : p.value}
               </span>
             </p>
@@ -130,19 +134,15 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-2.5 flex-wrap">
-          {/* Date range picker pill */}
-          <div className="flex items-center space-x-2 bg-[#12182b] border border-[#1e2744] px-3 py-1.5 rounded-xl text-xs text-slate-300 font-mono">
-            <Calendar size={13} className="text-purple-400" />
-            <span>Oct 1, 2026 - Dec 31, 2026</span>
-          </div>
-
-          {/* Region filter pill */}
-          <div className="flex items-center space-x-2 bg-[#12182b] border border-[#1e2744] px-3 py-1.5 rounded-xl text-xs text-slate-300 font-mono">
-            <MapPin size={13} className="text-cyan-400" />
-            <span>Chennai, Tamil Nadu</span>
-            <ChevronDown size={12} className="text-slate-400" />
-          </div>
-
+          <button
+            onClick={downloadChartSvg}
+            disabled={revenue_trajectory.length === 0}
+            className="flex items-center space-x-1.5 bg-[#141b30] hover:bg-[#1a233d] disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 border border-[#212c4d] px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
+            title="Download the rendered time-series chart as SVG"
+          >
+            <Download size={13} />
+            <span>Download Chart</span>
+          </button>
           {/* Switch Scope */}
           <button
             onClick={() => triggerAnalysis(analysisScope === 'query_result' ? 'entire_dataset' : 'query_result')}
@@ -151,6 +151,16 @@ export const AnalyticsDashboard: React.FC = () => {
           >
             <RefreshCw size={13} className={isLoading ? 'animate-spin text-purple-400' : 'text-purple-400'} />
             <span>{analysisScope === 'query_result' ? 'Switch to Full Dataset' : 'Switch to Filtered Query'}</span>
+          </button>
+          <button
+            onClick={() => {
+              const title = window.prompt('Name this report snapshot', `${currentDataset?.name || 'Dataset'} analysis`);
+              if (title !== null) saveCurrentReport(title);
+            }}
+            className="flex items-center space-x-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 border border-purple-500/30 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
+          >
+            <BookmarkPlus size={13} />
+            <span>Save Report</span>
           </button>
         </div>
       </div>
@@ -166,9 +176,8 @@ export const AnalyticsDashboard: React.FC = () => {
               <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                 {kpi.label}
               </span>
-              <span className="inline-flex items-center space-x-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <ArrowUpRight size={11} />
-                <span>+{kpi.change_pct}%</span>
+              <span className={`inline-flex items-center space-x-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${kpi.trend_direction === 'neutral' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                {kpi.trend_direction === 'neutral' ? <span>No comparison</span> : <><ArrowUpRight size={11} /><span>{kpi.change_pct}%</span></>}
               </span>
             </div>
 
@@ -186,18 +195,12 @@ export const AnalyticsDashboard: React.FC = () => {
               <span className="text-[11px] text-slate-400 truncate max-w-[140px]">
                 {kpi.subtitle || 'Active period'}
               </span>
-              {/* Mini SVG Sparkline */}
-              <div className="w-16 h-5">
-                <svg viewBox="0 0 60 20" className="w-full h-full stroke-purple-400 fill-none stroke-[2]">
-                  <polyline points="0,15 15,12 30,14 45,8 60,3" />
-                </svg>
-              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* 3. Main Row: Revenue Trajectory (Large) + Sales Channels (Bar) */}
+      {/* 3. Main Row: Date Trend (Large) + Group Breakdown (Bar) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Trajectory vs Target Line Chart (2 Cols) */}
         <div className="lg:col-span-2 bg-[#0f1527] border border-[#1d2744] rounded-2xl p-6 shadow-card space-y-4">
@@ -205,52 +208,27 @@ export const AnalyticsDashboard: React.FC = () => {
             <div>
               <div className="flex items-center space-x-2">
                 <span className="w-1 h-4 bg-purple-500 rounded-full" />
-                <h3 className="text-sm font-bold text-white">
-                  Revenue Trajectory vs Target (Monthly)
-                </h3>
+                <h3 className="text-sm font-bold text-white">{kpis[0]?.label || 'Metric'} by Month</h3>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Net Q4 Actual Revenue vs Projected Run-rate
+                Aggregated values across the available date periods
               </p>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="flex bg-[#0c101c] rounded-lg p-0.5 border border-[#1a233d] text-[10px] font-semibold">
-                <button
-                  onClick={() => setTrajectoryMode('monthly')}
-                  className={`px-2.5 py-1 rounded transition-colors ${
-                    trajectoryMode === 'monthly' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setTrajectoryMode('weekly')}
-                  className={`px-2.5 py-1 rounded transition-colors ${
-                    trajectoryMode === 'weekly' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Weekly
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="flex items-center space-x-4 text-xs font-mono text-slate-400">
             <span className="flex items-center gap-1.5 text-purple-400 font-semibold">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-              Actual Revenue
+              Monthly actuals
             </span>
-            <span className="flex items-center gap-1.5 text-cyan-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-              Dynamic Forecast
-            </span>
-            <span className="ml-auto text-emerald-400 font-bold">
-              Peak: ₹18.84 Lakhs
-            </span>
+            <span className="ml-auto text-slate-400">{revenue_trajectory.length} monthly periods</span>
           </div>
 
-          <div className="h-64 w-full">
+        <div className="h-64 w-full">
+            {revenue_trajectory.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-slate-400">No usable date and numeric columns were found for a time series.</div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenue_trajectory} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
@@ -264,32 +242,32 @@ export const AnalyticsDashboard: React.FC = () => {
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="period" stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <YAxis stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(val) => `₹${(val / 100000).toFixed(0)}L`} />
+                <YAxis stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(val) => val.toLocaleString()} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area type="monotone" dataKey="actual" name="Actual" stroke="#8b5cf6" strokeWidth={2.5} fillOpacity={1} fill="url(#purpleGradient)" />
-                <Area type="monotone" dataKey="forecast" name="Forecast" stroke="#06b6d4" strokeDasharray="3 3" strokeWidth={2} fillOpacity={1} fill="url(#cyanGradient)" />
               </AreaChart>
             </ResponsiveContainer>
+            )}
           </div>
         </div>
 
-        {/* Sales Channels Bar Chart (1 Col) */}
+        {/* Categorical Group Breakdown (1 Col) */}
         <div className="bg-[#0f1527] border border-[#1d2744] rounded-2xl p-6 shadow-card space-y-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white">Sales Channels</h3>
-              <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">
-                B2B Enterprise vs Retail
-              </span>
+              <h3 className="text-sm font-bold text-white">Group Breakdown</h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">Revenue breakdown by sales pipeline</p>
+            <p className="text-xs text-slate-400 mt-0.5">Selected metric by an available category or group</p>
           </div>
 
           <div className="h-56 w-full">
+            {sales_channels.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-slate-400">No categorical group and numeric metric were found.</div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sales_channels} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <XAxis dataKey="channel" stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                <YAxis stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} />
+                <YAxis stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => v.toLocaleString()} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                   {sales_channels.map((entry, index) => (
@@ -298,11 +276,12 @@ export const AnalyticsDashboard: React.FC = () => {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            )}
           </div>
 
           <div className="pt-3 border-t border-[#1a233d] flex items-center justify-between text-xs font-mono">
-            <span className="text-slate-400">Leading: Enterprise B2B</span>
-            <span className="text-emerald-400 font-bold">+₹24.1M</span>
+            <span className="text-slate-400">Leading group: {sales_channels[0]?.channel || '—'}</span>
+            <span className="text-emerald-400 font-bold">{sales_channels[0]?.share_pct ?? 0}%</span>
           </div>
         </div>
       </div>
@@ -313,10 +292,13 @@ export const AnalyticsDashboard: React.FC = () => {
         <div className="bg-[#0f1527] border border-[#1d2744] rounded-2xl p-6 shadow-card space-y-4 flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-bold text-white">Category Breakdown</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Distribution across 4 core product families</p>
+            <p className="text-xs text-slate-400 mt-0.5">Share of the selected metric by category</p>
           </div>
 
           <div className="relative h-48 w-full flex items-center justify-center">
+            {category_breakdown.length === 0 ? (
+              <div className="text-xs text-slate-400">No category column and numeric metric were found.</div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -334,6 +316,7 @@ export const AnalyticsDashboard: React.FC = () => {
                 <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
+            )}
             {/* Center label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-base font-extrabold text-white">{category_total}</span>
@@ -356,8 +339,8 @@ export const AnalyticsDashboard: React.FC = () => {
         <div className="bg-[#0f1527] border border-[#1d2744] rounded-2xl p-6 shadow-card space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-white">Top Products (Ranked)</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Gross Revenue Leaders (Q4)</p>
+              <h3 className="text-sm font-bold text-white">Top Items</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Ranked by {kpis[0]?.label || 'numeric value'}</p>
             </div>
             <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded">
               TOP 5
@@ -365,6 +348,7 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
 
           <div className="space-y-3 pt-1">
+            {top_products.length === 0 && <p className="text-xs text-slate-400">No product or item column was found.</p>}
             {top_products.map((p) => (
               <div key={p.rank} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
@@ -386,8 +370,8 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
 
           <div className="pt-3 border-t border-[#1a233d] flex items-center justify-between text-xs font-mono text-slate-400">
-            <span>Total account for: 78.4%</span>
-            <span className="text-purple-400">View All</span>
+            <span>Top 5 share of total: {top_products.reduce((sum, item) => sum + item.percentage, 0).toFixed(1)}%</span>
+            <span className="text-purple-400">{top_products.length} items</span>
           </div>
         </div>
 
@@ -404,6 +388,9 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
 
           <div className="h-48 w-full">
+            {margin_volume_matrix.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-slate-400">Add a product and margin or profit column to see this matrix.</div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <XAxis type="number" dataKey="volume" name="Units" stroke="#334155" tick={{ fill: '#94a3b8', fontSize: 10 }} />
@@ -412,11 +399,12 @@ export const AnalyticsDashboard: React.FC = () => {
                 <Scatter name="Products" data={margin_volume_matrix} fill="#8b5cf6" />
               </ScatterChart>
             </ResponsiveContainer>
+            )}
           </div>
 
           <div className="pt-3 border-t border-[#1a233d] flex items-center justify-between text-xs font-mono">
-            <span className="text-slate-400">Avg Margin: 42.4%</span>
-            <span className="text-cyan-400">Optimal quadrant: High-High</span>
+            <span className="text-slate-400">Avg margin: {margin_volume_matrix.length ? (margin_volume_matrix.reduce((sum, item) => sum + item.margin_pct, 0) / margin_volume_matrix.length).toFixed(1) : '—'}%</span>
+            <span className="text-cyan-400">{margin_volume_matrix.length} items</span>
           </div>
         </div>
       </div>
@@ -429,9 +417,9 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-sm text-white">Autonomous AI Synthesis:</span>
+              <span className="font-bold text-sm text-white">Dataset Summary:</span>
               <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">
-                EXECUTIVE
+                COMPUTED
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed max-w-3xl">

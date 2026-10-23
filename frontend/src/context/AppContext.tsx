@@ -11,6 +11,17 @@ import { api } from '../services/api';
 
 export type NavTab = 'overview' | 'sources' | 'studio' | 'analytics' | 'insights' | 'history' | 'saved' | 'settings';
 
+export interface SavedReport {
+  id: string;
+  title: string;
+  dataset_id: string;
+  dataset_name: string;
+  created_at: string;
+  analysis_scope: 'query_result' | 'entire_dataset';
+  analytics: AnalyticsDashboardResponse;
+  query_result: QueryResult | null;
+}
+
 interface AppContextType {
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
@@ -24,6 +35,10 @@ interface AppContextType {
   queryResult: QueryResult | null;
   setQueryResult: React.Dispatch<React.SetStateAction<QueryResult | null>>;
   queryHistory: QueryResult[];
+  savedReports: SavedReport[];
+  saveCurrentReport: (title: string) => void;
+  openSavedReport: (report: SavedReport) => void;
+  removeSavedReport: (reportId: string) => void;
   analysisScope: 'query_result' | 'entire_dataset';
   setAnalysisScope: (scope: 'query_result' | 'entire_dataset') => void;
   analyticsData: AnalyticsDashboardResponse | null;
@@ -35,7 +50,7 @@ interface AppContextType {
   refreshDatasets: (targetSelectId?: string) => Promise<DatasetMetadata[]>;
   selectDataset: (datasetId: string) => Promise<void>;
   clearAllDatasets: () => Promise<void>;
-  runQuery: (queryText: string, deepMode?: boolean) => Promise<void>;
+  runQuery: (queryText: string, deepMode?: boolean, datasetId?: string) => Promise<void>;
   triggerAnalysis: (target: 'query_result' | 'entire_dataset') => Promise<void>;
   refreshInsights: () => Promise<void>;
 }
@@ -50,7 +65,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [previewData, setPreviewData] = useState<PreviewResponse | null>(null);
   const [currentQuery, setCurrentQuery] = useState<string>('Show top 10 records by value');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
-  const [queryHistory, setQueryHistory] = useState<QueryResult[]>([]);
+  const [queryHistory, setQueryHistory] = useState<QueryResult[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('insightai.queryHistory') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [savedReports, setSavedReports] = useState<SavedReport[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('insightai.savedReports') || '[]');
+    } catch {
+      return [];
+    }
+  });
   const [analysisScope, setAnalysisScope] = useState<'query_result' | 'entire_dataset'>('query_result');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsDashboardResponse | null>(null);
   const [insightsData, setInsightsData] = useState<AIInsightsResponse | null>(null);
@@ -59,6 +87,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [error, setError] = useState<string | null>(null);
 
   const clearError = () => setError(null);
+
+  useEffect(() => {
+    localStorage.setItem('insightai.queryHistory', JSON.stringify(queryHistory));
+  }, [queryHistory]);
+
+  useEffect(() => {
+    localStorage.setItem('insightai.savedReports', JSON.stringify(savedReports));
+  }, [savedReports]);
+
+  const saveCurrentReport = (title: string) => {
+    if (!analyticsData || !currentDataset) return;
+    const report: SavedReport = {
+      id: `report_${Date.now()}`,
+      title: title.trim() || `${currentDataset.name} analysis`,
+      dataset_id: currentDataset.id,
+      dataset_name: currentDataset.name,
+      created_at: new Date().toISOString(),
+      analysis_scope: analysisScope,
+      analytics: analyticsData,
+      query_result: queryResult,
+    };
+    setSavedReports((previous) => [report, ...previous]);
+  };
+
+  const openSavedReport = (report: SavedReport) => {
+    const dataset = datasets.find((item) => item.id === report.dataset_id);
+    if (dataset) setCurrentDatasetState(dataset);
+    setAnalyticsData(report.analytics);
+    setAnalysisScope(report.analysis_scope);
+    setQueryResult(report.query_result);
+    setActiveTab('analytics');
+  };
+
+  const removeSavedReport = (reportId: string) => {
+    setSavedReports((previous) => previous.filter((report) => report.id !== reportId));
+  };
 
   const refreshDatasets = async (targetSelectId?: string): Promise<DatasetMetadata[]> => {
     try {
@@ -164,15 +228,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const runQuery = async (queryText: string, deepMode: boolean = false) => {
-    if (!currentDataset) {
-      setError('Please select or upload a dataset first.');
+  const runQuery = async (queryText: string, deepMode: boolean = false, datasetId?: string) => {
+    const targetDataset = datasetId
+      ? datasets.find((dataset) => dataset.id === datasetId)
+      : currentDataset;
+    if (!targetDataset) {
+      setError(datasetId ? 'The dataset used by this query is no longer connected.' : 'Please select or upload a dataset first.');
       return;
     }
     try {
       setIsLoading(true);
       setError(null);
-      const res = await api.executeQuery(currentDataset.id, queryText, deepMode);
+      const res = await api.executeQuery(targetDataset.id, queryText, deepMode);
+      if (targetDataset.id !== currentDataset?.id) setCurrentDatasetState(targetDataset);
       setQueryResult(res);
       setQueryHistory((prev) => [res, ...prev.slice(0, 19)]);
     } catch (err: any) {
@@ -239,6 +307,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         queryResult,
         setQueryResult,
         queryHistory,
+        savedReports,
+        saveCurrentReport,
+        openSavedReport,
+        removeSavedReport,
         analysisScope,
         setAnalysisScope,
         analyticsData,

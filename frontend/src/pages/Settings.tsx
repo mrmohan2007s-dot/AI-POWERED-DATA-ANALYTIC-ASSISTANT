@@ -11,6 +11,7 @@ export const Settings: React.FC = () => {
   const [provider, setProvider] = useState('gemini');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (settings) {
@@ -21,6 +22,7 @@ export const Settings: React.FC = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setSaveError(null);
     try {
       await api.updateSettings({
         gemini_api_key: geminiKey || undefined,
@@ -31,8 +33,8 @@ export const Settings: React.FC = () => {
       setSavedSuccess(true);
       await refreshDatasets();
       setTimeout(() => setSavedSuccess(false), 3000);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setSaveError(e.message || 'Could not save settings.');
     } finally {
       setSaving(false);
     }
@@ -74,6 +76,24 @@ export const Settings: React.FC = () => {
           <div className="space-y-4 pt-2">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Query and insight provider
+              </label>
+              <select
+                value={provider}
+                onChange={(e) => setProvider(e.target.value)}
+                className="w-full bg-[#12182b] border border-[#1e2847] focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none"
+              >
+                <option value="local">Local deterministic engine</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="openai">OpenAI</option>
+                <option value="groq">Groq</option>
+              </select>
+              <p className="text-[11px] text-slate-400 mt-1">
+                If the selected provider has no key configured or cannot be reached, queries fall back to the local engine.
+              </p>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Google Gemini API Key
               </label>
               <input
@@ -84,7 +104,7 @@ export const Settings: React.FC = () => {
                 className="w-full bg-[#12182b] border border-[#1e2847] focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none font-mono"
               />
               <p className="text-[11px] text-slate-400 mt-1">
-                Supports Gemini 1.5 Flash / Pro.
+                Used by the query interpreter, insights summary, and co-pilot when Gemini is selected.
               </p>
             </div>
 
@@ -150,9 +170,10 @@ export const Settings: React.FC = () => {
 
         {/* Submit */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-emerald-400 font-medium">
-            {savedSuccess && '✓ Settings updated and applied to active session.'}
-          </span>
+          <div className="text-xs font-medium">
+            {savedSuccess && <span className="text-emerald-400">✓ Settings updated and applied to active session.</span>}
+            {saveError && <span className="text-rose-400">{saveError}</span>}
+          </div>
           <button
             type="submit"
             disabled={saving}

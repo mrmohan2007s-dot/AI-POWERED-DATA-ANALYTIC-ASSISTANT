@@ -68,7 +68,7 @@ export const QueryHistory: React.FC = () => {
                     <button
                       onClick={() => {
                         setCurrentQuery(q.query_text);
-                        runQuery(q.query_text);
+                        runQuery(q.query_text, false, q.dataset_id);
                         setActiveTab('studio');
                       }}
                       className="px-3 py-1 rounded-lg bg-[#151c33] hover:bg-purple-600 text-purple-300 hover:text-white border border-[#232e52] text-[11px] font-sans font-semibold transition-all inline-flex items-center gap-1"

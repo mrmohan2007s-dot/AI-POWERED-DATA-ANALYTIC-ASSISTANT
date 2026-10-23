@@ -22,6 +22,12 @@ def format_inr(val: float) -> str:
     else:
         return f"₹{val:.2f}"
 
+def format_metric_value(val: float, column: Optional[str]) -> str:
+    currency_terms = ("revenue", "sales", "amount", "price", "cost", "profit", "spend", "budget", "salary", "fee")
+    if column and any(term in column.lower() for term in currency_terms):
+        return format_inr(val)
+    return f"{val:,.2f}" if not float(val).is_integer() else f"{int(val):,}"
+
 class AnalyticsService:
     def analyze(self, dataset_id: str, target: str = "query_result", query_result_id: Optional[str] = None) -> AnalyticsDashboardResponse:
         df: Optional[pd.DataFrame] = None
@@ -53,14 +59,23 @@ class AnalyticsService:
 
         # 1. Identify relevant columns dynamically with numeric verification
         rev_col = find_numeric_column(df, ["revenue", "sales_amount", "amount", "total", "spend", "salary", "price", "sales"])
-        units_col = find_numeric_column(df, ["quantity_sold", "quantity", "units", "qty", "orders", "count"])
-        margin_col = find_numeric_column(df, ["profit_margin", "margin", "profit", "discount"])
+        if not rev_col:
+            numeric_candidates = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+            rev_col = str(numeric_candidates[0]) if numeric_candidates else None
+        units_col = find_numeric_column(df, ["quantity_sold", "quantity", "units", "qty", "orders", "count"], fallback=False)
+        margin_col = find_numeric_column(df, ["profit_margin", "gross_margin", "margin_pct", "margin_percent", "margin"], fallback=False)
 
-        region_col = find_categorical_column(df, ["region", "city", "state", "location", "country", "branch"])
-        cat_col = find_categorical_column(df, ["product_category", "category", "department", "segment", "type", "channel"])
-        prod_col = find_categorical_column(df, ["product_name", "product", "item", "title", "name", "campaign", "sku", "product_id"])
+        region_col = find_categorical_column(df, ["region", "city", "state", "location", "country", "branch"], fallback=False)
+        cat_col = find_categorical_column(df, ["product_category", "category", "department", "segment", "type", "channel"], fallback=False)
+        prod_col = find_categorical_column(df, ["product_name", "product", "item", "title", "name", "campaign", "sku", "product_id"], fallback=False)
         date_col = find_date_column(df)
-        channel_col = find_categorical_column(df, ["sales_channel", "channel", "payment_method", "source"])
+        channel_col = find_categorical_column(df, ["sales_channel", "channel", "payment_method", "source"], fallback=False)
+        # Keep the group chart useful for general datasets that have no
+        # channel-like field. Prefer another real categorical dimension.
+        if not channel_col:
+            channel_col = region_col or find_categorical_column(
+                df, ["category", "segment", "department", "type"], fallback=True
+            )
 
         # Clean numeric series
         if rev_col and rev_col in df.columns:
@@ -76,8 +91,8 @@ class AnalyticsService:
             total_rev = float(df[rev_col].sum())
             rev_label = f"TOTAL {rev_col.upper()}"
         else:
-            total_rev = float(len(df) * 50000)
-            rev_label = "TOTAL VOLUME VALUE"
+            total_rev = 0.0
+            rev_label = "TOTAL NUMERIC VALUE"
 
         # Total Units / Orders
         if units_col and units_col in df.columns:
@@ -104,11 +119,11 @@ class AnalyticsService:
                 id="kpi_rev",
                 label=rev_label,
                 value=total_rev,
-                formatted_value=format_inr(total_rev),
-                change_pct=18.4,
-                trend_direction="up",
-                sparkline=[total_rev * 0.7, total_rev * 0.78, total_rev * 0.85, total_rev * 0.92, total_rev],
-                subtitle="vs previous period"
+                formatted_value=format_metric_value(total_rev, rev_col),
+                change_pct=0,
+                trend_direction="neutral",
+                sparkline=[total_rev],
+                subtitle="current dataset total"
             ),
             KPIMetric(
                 id="kpi_orders",
@@ -116,20 +131,20 @@ class AnalyticsService:
                 value=total_units,
                 formatted_value=f"{total_units:,}",
                 unit="units",
-                change_pct=12.1,
-                trend_direction="up",
-                sparkline=[total_units * 0.65, total_units * 0.75, total_units * 0.82, total_units],
-                subtitle="High fulfillment rate"
+                change_pct=0,
+                trend_direction="neutral",
+                sparkline=[total_units],
+                subtitle="current dataset total"
             ),
             KPIMetric(
                 id="kpi_aov",
                 label="AVERAGE VALUE (AOV)",
                 value=aov,
-                formatted_value=format_inr(aov),
-                change_pct=5.8,
-                trend_direction="up",
-                sparkline=[aov * 0.9, aov * 0.92, aov * 0.96, aov],
-                subtitle="Segment performance"
+                formatted_value=format_metric_value(aov, rev_col),
+                change_pct=0,
+                trend_direction="neutral",
+                sparkline=[aov],
+                subtitle="current dataset average"
             ),
             KPIMetric(
                 id="kpi_region",
@@ -137,10 +152,10 @@ class AnalyticsService:
                 value=top_region_name,
                 formatted_value=top_region_name,
                 unit=top_region_share,
-                change_pct=24.2,
-                trend_direction="up",
-                sparkline=[40, 55, 70, 85, 100],
-                subtitle="Concentration index"
+                change_pct=0,
+                trend_direction="neutral",
+                sparkline=[],
+                subtitle="largest category by record count"
             )
         ]
 
@@ -151,26 +166,16 @@ class AnalyticsService:
             temp_df['dt'] = pd.to_datetime(temp_df[date_col], errors='coerce')
             temp_df = temp_df.dropna(subset=['dt']).sort_values('dt')
             if not temp_df.empty:
-                temp_df['period'] = temp_df['dt'].dt.strftime('%b %d')
-                grouped = temp_df.groupby('period', sort=False)[rev_col].sum().head(12)
+                temp_df['period'] = temp_df['dt'].dt.to_period('M').astype(str)
+                grouped = temp_df.groupby('period', sort=True)[rev_col].sum().head(12)
                 for p, val in grouped.items():
                     act = float(val)
-                    tgt = act * 0.92
-                    fcst = act * 1.05
-                    trajectory.append(TimeSeriesPoint(period=str(p), actual=act, target=tgt, forecast=fcst))
-
-        if not trajectory:
-            base_v = max(100.0, total_rev / 12)
-            months = ["Period 1", "Period 2", "Period 3", "Period 4", "Period 5", "Period 6", "Period 7", "Period 8", "Period 9", "Period 10", "Period 11", "Period 12"]
-            multipliers = [0.65, 0.72, 0.80, 0.88, 0.95, 1.10, 1.25, 1.40, 1.35, 1.60, 1.85, 2.10]
-            for m, mult in zip(months, multipliers):
-                act = base_v * mult
-                trajectory.append(TimeSeriesPoint(period=m, actual=round(act, 0), target=round(act * 0.9, 0), forecast=round(act * 1.12, 0)))
+                    trajectory.append(TimeSeriesPoint(period=str(p), actual=act))
 
         # 4. Channels / Groups (Bar chart)
         channel_data = []
         palette = ["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b"]
-        effective_ch_col = channel_col if (channel_col and channel_col in df.columns) else cat_col
+        effective_ch_col = channel_col if (channel_col and channel_col in df.columns) else None
         if effective_ch_col and effective_ch_col in df.columns and rev_col and rev_col in df.columns:
             ch_grp = df.groupby(effective_ch_col)[rev_col].sum().sort_values(ascending=False).head(4)
             ch_total = float(ch_grp.sum())
@@ -183,12 +188,6 @@ class AnalyticsService:
                     share_pct=round(share, 1),
                     color=palette[idx % len(palette)]
                 ))
-        if not channel_data:
-            channel_data = [
-                ChannelData(channel="Direct", value=total_rev * 0.55, share_pct=55.2, color="#8b5cf6"),
-                ChannelData(channel="Online", value=total_rev * 0.30, share_pct=30.1, color="#06b6d4"),
-                ChannelData(channel="Retail", value=total_rev * 0.15, share_pct=14.7, color="#10b981")
-            ]
 
         # 5. Category Breakdown (Donut chart)
         category_data = []
@@ -205,11 +204,6 @@ class AnalyticsService:
                     percentage=round(pct, 1),
                     color=cat_palette[idx % len(cat_palette)]
                 ))
-        if not category_data:
-            category_data = [
-                CategoryData(category="Primary Segment", value=total_rev * 0.60, percentage=60.0, color="#8b5cf6"),
-                CategoryData(category="Secondary Segment", value=total_rev * 0.40, percentage=40.0, color="#06b6d4")
-            ]
 
         # 6. Top Products / Items
         top_products = []
@@ -219,11 +213,11 @@ class AnalyticsService:
                 agg_dict[units_col] = 'sum'
             
             p_grp = df.groupby(prod_col).agg(agg_dict).sort_values(by=rev_col, ascending=False).head(5)
-            p_total = float(p_grp[rev_col].sum())
+            p_total = float(pd.to_numeric(df[rev_col], errors='coerce').fillna(0).sum())
             
             for rank, (pname, row) in enumerate(p_grp.iterrows(), 1):
                 val = float(row[rev_col])
-                units = int(row[units_col]) if (units_col and units_col in p_grp.columns and units_col != rev_col) else 10
+                units = int(row[units_col]) if (units_col and units_col in p_grp.columns and units_col != rev_col) else int((df[prod_col] == pname).sum())
                 share = (val / p_total * 100) if p_total > 0 else 0
                 
                 p_cat = "General"
@@ -237,33 +231,22 @@ class AnalyticsService:
                     name=str(pname),
                     category=p_cat,
                     value=val,
-                    formatted_value=format_inr(val),
+                    formatted_value=format_metric_value(val, rev_col),
                     percentage=round(share, 1),
                     units=units
                 ))
-        if not top_products:
-            # Fallback using whatever columns exist
-            for rank in range(1, min(6, len(df) + 1)):
-                top_products.append(TopProductItem(
-                    rank=rank,
-                    name=f"Record #{rank}",
-                    category="Active",
-                    value=round(total_rev / max(1, rank * 2), 2),
-                    formatted_value=format_inr(total_rev / max(1, rank * 2)),
-                    percentage=round(100.0 / rank, 1),
-                    units=1
-                ))
-
         # 7. Margin vs Volume Matrix
         margin_volume = []
-        for item in top_products:
+        for item in (top_products if margin_col else []):
             if prod_col and prod_col in df.columns:
                 prod_df = df[df[prod_col] == item.name]
                 vol = int(prod_df[units_col].sum()) if (units_col and units_col in prod_df.columns) else item.units
-                m_pct = float(prod_df[margin_col].mean() * 100) if (margin_col and margin_col in prod_df.columns) else 35.0
+                margin_value = float(prod_df[margin_col].mean()) if margin_col in prod_df.columns else 0.0
+                m_pct = margin_value * 100 if margin_value <= 1.0 else margin_value
             else:
                 vol = item.units
-                m_pct = 35.0
+                margin_value = float(df[margin_col].mean()) if margin_col in df.columns else 0.0
+                m_pct = margin_value * 100 if margin_value <= 1.0 else margin_value
 
             margin_volume.append(MarginVolumePoint(
                 product=item.name,
@@ -273,7 +256,11 @@ class AnalyticsService:
                 category=item.category
             ))
 
-        ai_summary = f"Autonomous AI Synthesis: Top concentration identified in {top_region_name}. Primary metric indicates consistent distribution across {len(df)} records. Recommended action: inspect top ranked items to optimize efficiency."
+        ai_summary = f"Summary computed from {len(df):,} records."
+        if region_col and top_region_name != "Global Market":
+            ai_summary += f" The most common {region_col} is {top_region_name} ({top_region_share})."
+        if rev_col:
+            ai_summary += f" The dataset total for {rev_col} is {format_metric_value(total_rev, rev_col)}."
 
         return AnalyticsDashboardResponse(
             scope=scope_title,
@@ -284,7 +271,7 @@ class AnalyticsService:
             revenue_trajectory=trajectory,
             sales_channels=channel_data,
             category_breakdown=category_data,
-            category_total=format_inr(total_rev),
+            category_total=format_metric_value(total_rev, rev_col),
             top_products=top_products,
             margin_volume_matrix=margin_volume,
             autonomous_ai_summary=ai_summary

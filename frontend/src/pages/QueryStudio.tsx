@@ -32,7 +32,8 @@ export const QueryStudio: React.FC<{ onOpenFullSheet: () => void }> = ({ onOpenF
     runQuery,
     triggerAnalysis,
     isLoading,
-    setActiveTab
+    setActiveTab,
+    settings
   } = useApp();
 
   const [deepMode, setDeepMode] = useState(false);
@@ -40,15 +41,21 @@ export const QueryStudio: React.FC<{ onOpenFullSheet: () => void }> = ({ onOpenF
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
   const [previewFilter, setPreviewFilter] = useState('');
+  const deepModeAvailable = Boolean(
+    settings?.llm_provider === 'gemini' && settings.gemini_configured ||
+    settings?.llm_provider === 'openai' && settings.openai_configured ||
+    settings?.llm_provider === 'groq' && settings.groq_configured
+  );
 
-  const exampleChips = [
-    'Show the top 10 products by revenue in Chennai during the last 3 months with quantity sold and average margin',
-    'What is top 5 products by revenue',
-    'Filter sales above ₹50,000',
-    'Compare Chennai vs Bangalore',
-    'Show monthly trend for 2026',
-    'Calculate the average order value'
-  ];
+  const metricColumn = currentDataset?.columns.find((column) => column.semantic_type === 'curr' || column.semantic_type === 'num');
+  const categoryColumn = currentDataset?.columns.find((column) => column.semantic_type === 'cat' || column.semantic_type === 'text');
+  const exampleChips = currentDataset
+    ? [
+        metricColumn ? `Show top 10 records by ${metricColumn.name}` : 'Show top 10 records',
+        metricColumn && categoryColumn ? `Show top 10 ${categoryColumn.name} by ${metricColumn.name}` : 'Show all records',
+        'Show all records',
+      ].filter((query, index, list) => list.indexOf(query) === index)
+    : ['Upload a dataset to see matching query examples'];
 
   const handleCopyCode = () => {
     if (!queryResult) return;
@@ -251,9 +258,12 @@ export const QueryStudio: React.FC<{ onOpenFullSheet: () => void }> = ({ onOpenF
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-slate-400 font-medium">Deep Mode</span>
+            <span className="text-xs text-slate-400 font-medium" title={deepModeAvailable ? 'Use the configured language model to interpret this query' : 'Configure a language model and API key in Settings'}>
+              {deepModeAvailable ? 'AI Deep Mode' : 'Local Mode'}
+            </span>
             <button
-              onClick={() => setDeepMode(!deepMode)}
+              onClick={() => deepModeAvailable ? setDeepMode(!deepMode) : setActiveTab('settings')}
+              title={deepModeAvailable ? 'Toggle AI query interpretation' : 'Open Settings to configure an AI provider'}
               className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out ${
                 deepMode ? 'bg-purple-600' : 'bg-[#1a233d]'
               }`}
@@ -322,11 +332,12 @@ export const QueryStudio: React.FC<{ onOpenFullSheet: () => void }> = ({ onOpenF
             {exampleChips.map((chip, idx) => (
               <button
                 key={idx}
+                  disabled={!currentDataset}
                 onClick={() => {
                   setCurrentQuery(chip);
                   runQuery(chip, deepMode);
                 }}
-                className="text-xs bg-[#12182b] hover:bg-[#19223c] text-slate-300 hover:text-purple-300 border border-[#1e2847] hover:border-purple-500/40 px-3 py-1.5 rounded-lg transition-all text-left"
+                className="text-xs bg-[#12182b] hover:bg-[#19223c] text-slate-300 hover:text-purple-300 border border-[#1e2847] hover:border-purple-500/40 px-3 py-1.5 rounded-lg transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {chip}
               </button>

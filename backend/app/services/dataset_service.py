@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import datetime
 from pathlib import Path
@@ -13,8 +14,16 @@ class DatasetService:
     def __init__(self):
         self._cache: Dict[str, pd.DataFrame] = {}
         self._metadata_cache: Dict[str, DatasetMetadata] = {}
-        # Ensure sample files exist on disk if user ever wants them,
-        # but do NOT pre-load them into active connected datasets!
+        # Keep uploaded datasets available after a backend restart.
+        for path in UPLOAD_DIR.iterdir():
+            if not path.is_file():
+                continue
+            match = re.match(r"^(ds_[a-f0-9]+)_(.+)$", path.name, re.IGNORECASE)
+            if match:
+                self._load_from_path(path, match.group(1), match.group(2))
+
+        # Ensure sample files exist on disk if not present, but do NOT
+        # automatically connect them as active datasets.
         self._ensure_sample_files()
 
     def _infer_semantic_type(self, col_name: str, dtype: str, sample_series: pd.Series) -> str:
@@ -39,6 +48,21 @@ class DatasetService:
             except Exception:
                 pass
             return "text"
+
+    @staticmethod
+    def _sanitize_column_names(df: pd.DataFrame) -> pd.DataFrame:
+        cols = []
+        counts: Dict[str, int] = {}
+        for column in df.columns:
+            clean_name = str(column).strip() or "Unnamed"
+            if clean_name in counts:
+                counts[clean_name] += 1
+                cols.append(f"{clean_name}_{counts[clean_name]}")
+            else:
+                counts[clean_name] = 0
+                cols.append(clean_name)
+        df.columns = cols
+        return df
 
     def _build_metadata(self, df: pd.DataFrame, dataset_id: str, name: str, filename: str, file_path: Path, is_sample: bool = False) -> DatasetMetadata:
         columns_schema = []
@@ -213,9 +237,11 @@ class DatasetService:
             else:
                 return
 
+            df = self._sanitize_column_names(df)
+
             self._cache[dataset_id] = df
             self._metadata_cache[dataset_id] = self._build_metadata(
-                df, dataset_id=dataset_id, name=name, filename=path.name, file_path=path, is_sample=is_sample
+                df, dataset_id=dataset_id, name=name, filename=name, file_path=path, is_sample=is_sample
             )
         except Exception as e:
             print(f"Error loading {path}: {e}")
@@ -237,6 +263,9 @@ class DatasetService:
         size_bytes = len(file_content)
         if size_bytes > MAX_UPLOAD_SIZE_MB * 1024 * 1024:
             raise ValueError(f"File size exceeds maximum allowed limit of {MAX_UPLOAD_SIZE_MB}MB.")
+        current_storage = sum(path.stat().st_size for path in UPLOAD_DIR.iterdir() if path.is_file())
+        if current_storage + size_bytes > MAX_UPLOAD_SIZE_MB * 1024 * 1024:
+            raise ValueError(f"Workspace storage quota of {MAX_UPLOAD_SIZE_MB}MB would be exceeded.")
 
         dataset_id = f"ds_{uuid.uuid4().hex[:10]}"
         safe_filename = f"{dataset_id}_{Path(filename).name}"
@@ -266,18 +295,7 @@ class DatasetService:
                 save_path.unlink()
             raise ValueError("Uploaded file is empty.")
 
-        # Sanitize column names: convert unnamed or duplicates
-        cols = []
-        counts: Dict[str, int] = {}
-        for c in df.columns:
-            clean_c = str(c).strip() or "Unnamed"
-            if clean_c in counts:
-                counts[clean_c] += 1
-                cols.append(f"{clean_c}_{counts[clean_c]}")
-            else:
-                counts[clean_c] = 0
-                cols.append(clean_c)
-        df.columns = cols
+        df = self._sanitize_column_names(df)
 
         self._cache[dataset_id] = df
         metadata = self._build_metadata(df, dataset_id=dataset_id, name=filename, filename=filename, file_path=save_path, is_sample=False)

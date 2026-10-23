@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Search,
-  Bell,
   HelpCircle,
   Download,
   Database,
@@ -12,8 +11,34 @@ import {
 import { useApp } from '../context/AppContext';
 import { api } from '../services/api';
 
-export const Header: React.FC<{ onOpenExportModal?: () => void }> = ({ onOpenExportModal }) => {
-  const { currentDataset, activeTab, queryResult, setActiveTab } = useApp();
+export const Header: React.FC = () => {
+  const { currentDataset, datasets, activeTab, queryResult, queryHistory, setActiveTab, setCurrentQuery, runQuery, selectDataset } = useApp();
+  const [searchText, setSearchText] = useState('');
+
+  const handleSearch = async () => {
+    const term = searchText.trim().toLowerCase();
+    if (!term) return;
+    const previousQuery = queryHistory.find((query) => query.query_text.toLowerCase().includes(term));
+    if (previousQuery) {
+      setCurrentQuery(previousQuery.query_text);
+      await runQuery(previousQuery.query_text, false, previousQuery.dataset_id);
+      setActiveTab('studio');
+      return;
+    }
+    const matchingDataset = datasets.find((dataset) => dataset.name.toLowerCase().includes(term));
+    if (matchingDataset) {
+      await selectDataset(matchingDataset.id);
+      setActiveTab('sources');
+      return;
+    }
+    const matchingColumn = currentDataset?.columns.find((column) => column.name.toLowerCase().includes(term));
+    if (matchingColumn) {
+      setCurrentQuery(`Show top 10 records by ${matchingColumn.name}`);
+      setActiveTab('studio');
+      return;
+    }
+    setActiveTab('sources');
+  };
 
   const getBreadcrumbLabel = () => {
     switch (activeTab) {
@@ -86,7 +111,7 @@ export const Header: React.FC<{ onOpenExportModal?: () => void }> = ({ onOpenExp
         )}
       </div>
 
-      {/* Middle/Right: Search bar, notification, Help, Export */}
+        {/* Middle/Right: Search, Help, Export */}
       <div className="flex items-center space-x-4">
         {/* Search input */}
         <div className="relative w-64 md:w-80">
@@ -94,16 +119,15 @@ export const Header: React.FC<{ onOpenExportModal?: () => void }> = ({ onOpenExp
           <input
             type="text"
             placeholder="Search queries, tables, schemas..."
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && void handleSearch()}
             className="w-full bg-[#111728] border border-[#1e263d] focus:border-purple-500 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none transition-colors"
           />
         </div>
 
         {/* Icons */}
         <div className="flex items-center space-x-1.5 text-slate-400">
-          <button className="relative p-2 rounded-lg hover:bg-[#151c30] hover:text-slate-200 transition-colors">
-            <Bell size={16} />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-purple-500 rounded-full" />
-          </button>
           <button 
             onClick={() => setActiveTab('settings')}
             className="p-2 rounded-lg hover:bg-[#151c30] hover:text-slate-200 transition-colors"
@@ -123,7 +147,9 @@ export const Header: React.FC<{ onOpenExportModal?: () => void }> = ({ onOpenExp
         {/* Export Button */}
         <button
           onClick={handleQuickExport}
-          className="flex items-center space-x-1.5 bg-[#141b2e] hover:bg-[#1c2642] text-slate-200 border border-[#222d4c] px-3 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm"
+          disabled={!currentDataset}
+          title={currentDataset ? 'Export current dataset or query results' : 'Connect a dataset to export'}
+          className="flex items-center space-x-1.5 bg-[#141b2e] hover:bg-[#1c2642] text-slate-200 border border-[#222d4c] px-3 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Download size={14} className="text-purple-400" />
           <span>Export</span>

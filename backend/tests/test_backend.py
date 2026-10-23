@@ -13,8 +13,8 @@ from app.schemas.models import QueryRequest
 
 @pytest.fixture(autouse=True)
 def setup_test_dataset():
-    # Start clean
-    dataset_service.clear_all_datasets()
+    # Never clear the shared upload directory: it may contain user datasets
+    # loaded by the running application. Remove only the fixture created here.
     csv_bytes = (
         b"Order ID,Product Name,Category,Region,Revenue,Units Sold,Profit Margin,Discount Applied\n"
         b"ORD-1,NeuralEdge Workstation,Hardware,Chennai,1980000,4,0.42,0.05\n"
@@ -25,7 +25,7 @@ def setup_test_dataset():
     )
     meta = dataset_service.upload_dataset(csv_bytes, "test_sales.csv")
     yield meta
-    dataset_service.clear_all_datasets()
+    dataset_service.delete_dataset(meta.id)
 
 def test_initial_dataset_clean(setup_test_dataset):
     datasets = dataset_service.list_datasets()
